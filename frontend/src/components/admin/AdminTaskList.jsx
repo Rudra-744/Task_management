@@ -28,7 +28,7 @@ const AdminTaskList = ({ tasks, setEditingTask, handleDeleteTask }) => {
               </p>
               {task.attachmentUrl && (
                 <a
-                  href={`http://localhost:3000${task.attachmentUrl}`}
+                  href={task.attachmentUrl}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1.5 mt-1 w-fit max-w-full px-2 py-1 bg-stone-100 hover:bg-stone-200 border border-stone-200 text-stone-600 rounded-md transition-colors"

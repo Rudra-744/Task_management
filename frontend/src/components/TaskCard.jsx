@@ -80,7 +80,7 @@ const TaskCard = ({ task, onUpdate }) => {
         {task.attachmentUrl && (
           <div className="mt-3 relative group w-48 shrink-0">
             <a
-              href={`http://localhost:3000${task.attachmentUrl}`}
+              href={task.attachmentUrl}
               download
               target="_blank"
               rel="noreferrer"

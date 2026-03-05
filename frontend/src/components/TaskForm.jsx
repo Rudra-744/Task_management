@@ -8,9 +8,7 @@ const TaskForm = ({ task, onTaskCreated, onClose }) => {
   const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
   const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(
-    task?.image ? `http://localhost:3000/uploads/${task.image}` : null,
-  );
+  const [preview, setPreview] = useState(task?.attachmentUrl || null);
   const [loading, setLoading] = useState(false);
 
   const isEditMode = !!task;
