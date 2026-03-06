@@ -45,19 +45,21 @@ export const signup = async (req, res) => {
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "7d",
       },
     );
 
+    const isProduction = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV !== "development",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
+      secure: isProduction || req.secure, // Secure for production or HTTPS
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(201).json({
       message: "User created successfully",
+      token, // Send token in response too
       user: {
         id: newUser._id,
         name: newUser.name,
@@ -94,18 +96,20 @@ export const login = async (req, res) => {
         id: user._id,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" },
+      { expiresIn: "7d" },
     );
 
+    const isProduction = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV !== "development",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      secure: isProduction || req.secure,
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({
       message: "Login successful",
+      token, // Send token in response too
       user: {
         id: user._id,
         name: user.name,

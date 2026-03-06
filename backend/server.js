@@ -13,11 +13,11 @@ connectDB();
 
 const app = express();
 
-// Security Headers
+app.set("trust proxy", 1);
+
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 
-// CORS Config for production
 app.use(
   cors({
     origin: function (origin, callback) {

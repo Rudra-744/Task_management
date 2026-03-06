@@ -144,11 +144,9 @@ export const updateTask = async (req, res) => {
       updateData.image = req.file.filename;
     }
 
-    const task = await Task.findByIdAndUpdate(
-      req.Params.id || req.params.id,
-      updateData,
-      { new: true },
-    );
+    const task = await Task.findByIdAndUpdate(req.params.id, updateData, {
+      new: true,
+    });
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
