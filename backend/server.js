@@ -20,7 +20,29 @@ app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 // CORS Config for production
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        "http://localhost:5173",
+        "https://task-management-roan-nine.vercel.app",
+        "https://task-management-416hh5hlg-rudra-744s-projects.vercel.app",
+        "https://task-management-git-main-rudra-744s-projects.vercel.app",
+      ];
+
+      // Allow requests with no origin (like mobile apps or curl requests)
+      // or if the origin is in our list of allowed origins
+      // or if it matches the FRONTEND_URL env variable
+      // or if it is a Vercel deployment ending in .vercel.app
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        origin === process.env.FRONTEND_URL ||
+        origin.endsWith(".vercel.app")
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );

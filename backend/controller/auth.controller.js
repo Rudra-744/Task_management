@@ -53,7 +53,7 @@ export const signup = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV !== "development",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // Make session last 7 days instead of 1 hr for better UX
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
     });
 
     res.status(201).json({
