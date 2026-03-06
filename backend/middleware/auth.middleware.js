@@ -22,6 +22,8 @@ export const protectRoute = async (req, res, next) => {
 
 export const protectAdminRoute = async (req, res, next) => {
   try {
+    console.log("Cookies received:", req.cookies);
+    console.log("Headers:", req.headers);
     const token = req.cookies.token;
     if (!token) {
       return res.status(401).json({ message: "Unauthorized - Token missing" });

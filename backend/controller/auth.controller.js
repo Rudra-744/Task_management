@@ -102,8 +102,8 @@ export const login = async (req, res) => {
     const isProduction = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction || req.secure,
-      sameSite: isProduction ? "none" : "lax",
+      secure: true, // Always true for cross-origin cookies to work
+      sameSite: "none", // Required for cross-origin cookies
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -155,11 +155,11 @@ export const adminLogin = async (req, res) => {
       { expiresIn: "7d" },
     );
 
-    const isProduction = process.env.NODE_ENV === "production";
+    console.log("Setting cookie for user:", user.email, "Role:", user.role);
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction || req.secure,
-      sameSite: isProduction ? "none" : "lax",
+      secure: true, // Always true for cross-origin cookies to work
+      sameSite: "none", // Required for cross-origin cookies
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -195,7 +195,11 @@ export const getMe = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    res.clearCookie("token");
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
