@@ -49,13 +49,18 @@ const AdminDashboard = () => {
     try {
       const res = await axiosInstance.get("/admin/users");
       setUsers(res.data);
+      if (res.data.length === 0) {
+        toast.error("No employees found. Please register employees first.");
+      }
     } catch (err) {
       console.error("Fetch users failed", err);
       // Surface toast if it's a 401 error
       if (err.response?.status === 401) {
         toast.error("Session expired. Please login again.");
+        setUser(null);
+        navigate("/auth");
       } else {
-        toast.error("Failed to load employee list");
+        toast.error(err.response?.data?.message || "Failed to load employee list");
       }
     }
   };
