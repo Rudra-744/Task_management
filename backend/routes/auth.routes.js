@@ -2,6 +2,7 @@ import express from "express";
 import {
   signup,
   login,
+  adminLogin,
   getMe,
   logout,
   updateProfile,
@@ -13,6 +14,7 @@ const router = express.Router();
 
 router.post("/signup", signup);
 router.post("/login", login);
+router.post("/admin-login", adminLogin);
 router.get("/me", getMe);
 router.post("/logout", logout);
 router.put("/profile", protectRoute, updateProfile);
