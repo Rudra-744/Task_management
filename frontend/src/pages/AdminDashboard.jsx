@@ -3,6 +3,7 @@ import axiosInstance from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Menu } from "lucide-react";
+import toast from "react-hot-toast";
 
 import AdminSidebar from "../components/admin/AdminSidebar";
 import AssignTaskForm from "../components/admin/AssignTaskForm";
@@ -35,13 +36,28 @@ const AdminDashboard = () => {
   }, []);
 
   const fetchTasks = async () => {
-    const res = await axiosInstance.get("/admin/tasks");
-    setTasks(res.data);
+    try {
+      const res = await axiosInstance.get("/admin/tasks");
+      setTasks(res.data);
+    } catch (err) {
+      console.error("Fetch tasks failed", err);
+      // Optional: import toast if possible, or just log
+    }
   };
 
   const fetchUsers = async () => {
-    const res = await axiosInstance.get("/admin/users");
-    setUsers(res.data);
+    try {
+      const res = await axiosInstance.get("/admin/users");
+      setUsers(res.data);
+    } catch (err) {
+      console.error("Fetch users failed", err);
+      // Surface toast if it's a 401 error
+      if (err.response?.status === 401) {
+        toast.error("Session expired. Please login again.");
+      } else {
+        toast.error("Failed to load employee list");
+      }
+    }
   };
 
   const handleLogout = async () => {
