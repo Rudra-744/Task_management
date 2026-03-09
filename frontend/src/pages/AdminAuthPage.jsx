@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import axiosInstance from "../api/axios";
+import axiosInstance, { setToken } from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 
 const AdminAuthPage = () => {
@@ -19,7 +19,11 @@ const AdminAuthPage = () => {
       console.log("🔐 Admin login attempt");
       const res = await axiosInstance.post("/auth/admin-login", form);
       console.log("✓ Login successful:", res.data.user.email);
-      console.log("✓ Cookie will be set by server");
+      
+      // Store token for Authorization header
+      if (res.data.token) {
+        setToken(res.data.token);
+      }
       
       // Set user in context
       setUser(res.data.user);

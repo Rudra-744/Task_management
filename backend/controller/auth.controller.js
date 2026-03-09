@@ -181,9 +181,18 @@ export const adminLogin = async (req, res) => {
 
 export const getMe = async (req, res) => {
   try {
-    const token = req.cookies.token;
+    let token = req.cookies.token;
+    
+    // Try Authorization header if no cookie
+    if (!token && req.headers.authorization) {
+      const auth = req.headers.authorization;
+      if (auth.startsWith("Bearer ")) {
+        token = auth.slice(7);
+      }
+    }
+
     if (!token) {
-      console.log("No token found in cookies. Cookies:", req.cookies);
+      console.log("❌ No token found in cookies or headers");
       return res.status(401).json({ message: "Unauthorized" });
     }
 
@@ -191,10 +200,11 @@ export const getMe = async (req, res) => {
     const user = await User.findById(decoded.id).select("-password");
     if (!user) return res.status(401).json({ message: "User not found" });
 
+    console.log("✓ /auth/me - User authenticated:", user.email);
     res.status(200).json({ user });
   } catch (error) {
-    console.log("getMe error:", error.message);
-    res.status(401).json({ message: "Server error" });
+    console.log("❌ getMe error:", error.message);
+    res.status(401).json({ message: "Unauthorized" });
   }
 };
 
