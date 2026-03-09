@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import axiosInstance from "../api/axios";
+import axiosInstance, { setAuthToken } from "../api/axios";
 
 const AuthContext = createContext();
 
@@ -10,6 +10,15 @@ export const AuthProvider = ({ children }) => {
   // Check if user is logged in on mount
   useEffect(() => {
     console.log("🔍 Checking auth status...");
+    
+    // First, restore token from sessionStorage if it exists
+    const savedToken = sessionStorage.getItem("authToken");
+    if (savedToken) {
+      console.log("✓ Found token in sessionStorage");
+      setAuthToken(savedToken);
+    }
+
+    // Then verify with /auth/me
     axiosInstance
       .get("/auth/me")
       .then((res) => {
@@ -23,8 +32,19 @@ export const AuthProvider = ({ children }) => {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleSetUser = (userData) => {
+    if (userData) {
+      console.log("✓ Setting user:", userData.email);
+      setUser(userData);
+    } else {
+      console.log("🔄 Clearing user");
+      setUser(null);
+      setAuthToken(null); // Clear token on logout
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser, loading }}>
+    <AuthContext.Provider value={{ user, setUser: handleSetUser, loading }}>
       {children}
     </AuthContext.Provider>
   );
