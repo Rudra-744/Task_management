@@ -52,8 +52,9 @@ export const signup = async (req, res) => {
     const isProduction = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction ? true : false, // Secure only in production
+      secure: isProduction ? true : false,
       sameSite: isProduction ? "none" : "lax",
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -160,8 +161,7 @@ export const adminLogin = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: isProduction ? true : false,
-      sameSite: isProduction ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: isProduction ? "none" : "lax",      path: "/",      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({
@@ -205,6 +205,7 @@ export const logout = async (req, res) => {
       httpOnly: true,
       secure: isProduction ? true : false,
       sameSite: isProduction ? "none" : "lax",
+      path: "/",
     });
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
