@@ -1,55 +1,21 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-// Create transporter once (connection pooling for faster emails)
-let transporter = null;
-
-const getTransporter = () => {
-  if (!transporter) {
-    console.log("📧 Creating email transporter...");
-    console.log("📧 EMAIL_USER:", process.env.EMAIL_USER);
-    console.log("📧 EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
-    console.log("📧 EMAIL_PASS length:", process.env.EMAIL_PASS?.length || 0);
-    
-    transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS || "",
-      },
-      // Connection pooling for faster delivery
-      pool: true,
-      maxConnections: 5,
-      maxMessages: 100,
-    });
-    
-    // Verify connection
-    transporter.verify((error, success) => {
-      if (error) {
-        console.log("❌ Email transporter verification failed:", error.message);
-      } else {
-        console.log("✅ Email transporter ready to send!");
-      }
-    });
-  }
-  return transporter;
-};
+// Initialize Resend with API key
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendTaskEmail = async (task, action, userEmail) => {
-  console.log("=== EMAIL SEND ATTEMPT ===");
+  console.log("=== EMAIL SEND ATTEMPT (Resend) ===");
   console.log("📧 To:", userEmail);
   console.log("📧 Action:", action);
   console.log("📧 Task:", task.title);
-  
-  try {
-    const transport = getTransporter();
+  console.log("📧 API Key exists:", !!process.env.RESEND_API_KEY);
 
+  try {
     const subject =
       action === "completed"
         ? `🎉 Task Completed: ${task.title}`
         : action === "assigned"
-          ? `📋 New Task Assigned to You: ${task.title}`
+          ? `📋 New Task Assigned: ${task.title}`
           : `✅ New Task Created: ${task.title}`;
 
     const html = `
@@ -61,29 +27,30 @@ export const sendTaskEmail = async (task, action, userEmail) => {
         <p><strong>Status:</strong> ${task.completed ? "✅ Completed" : "⏳ Pending"}</p>
         <p><strong>Time:</strong> ${new Date(task.createdAt || Date.now()).toLocaleString()}</p>
         <hr/>
-        <p style="color: #888; font-size: 12px;">This is an automated email from Task Manager.</p>
+        <p style="color: #888; font-size: 12px;">This is an automated email from DOT IT Task Manager.</p>
       </div>
     `;
 
-    const mailOptions = {
-      from: `"DOT IT." <${process.env.EMAIL_USER}>`,
+    console.log("📧 Sending via Resend...");
+    
+    const { data, error } = await resend.emails.send({
+      from: "DOT IT <onboarding@resend.dev>", // Free tier uses this
       to: userEmail,
-      subject,
-      html,
-    };
+      subject: subject,
+      html: html,
+    });
 
-    console.log("📧 Sending email...");
-    const result = await transport.sendMail(mailOptions);
+    if (error) {
+      console.log("❌ Resend Error:", error);
+      throw new Error(error.message);
+    }
+
     console.log("✅ EMAIL SENT SUCCESSFULLY!");
-    console.log("📧 Message ID:", result.messageId);
-    console.log("📧 Response:", result.response);
-    return result;
+    console.log("📧 Email ID:", data.id);
+    return data;
   } catch (error) {
     console.log("❌ EMAIL SEND FAILED!");
-    console.log("❌ Error name:", error.name);
-    console.log("❌ Error message:", error.message);
-    console.log("❌ Error code:", error.code);
-    console.log("❌ Full error:", error);
+    console.log("❌ Error:", error.message);
     throw error;
   }
 };
