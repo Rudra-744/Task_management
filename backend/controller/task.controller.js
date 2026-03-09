@@ -16,7 +16,12 @@ export const createTask = async (req, res) => {
       user: req.user.id,
     });
     await newTask.save();
-    await sendTaskEmail(newTask, "created", req.user.email);
+    
+    // Send email in background (non-blocking)
+    sendTaskEmail(newTask, "created", req.user.email).catch((err) =>
+      console.log("Email send failed:", err.message)
+    );
+    
     res
       .status(201)
       .json({ message: "Task created successfully", task: newTask });
@@ -57,9 +62,14 @@ export const updateTask = async (req, res) => {
     task.description = description || task.description;
     task.completed = completed !== undefined ? completed : task.completed;
     await task.save();
+    
+    // Send email in background (non-blocking)
     if (completed === true || completed === "true") {
-      await sendTaskEmail(task, "completed", req.user.email);
+      sendTaskEmail(task, "completed", req.user.email).catch((err) =>
+        console.log("Email send failed:", err.message)
+      );
     }
+    
     res.status(200).json({ message: "Task updated successfully", task });
   } catch (error) {
     console.log(error);

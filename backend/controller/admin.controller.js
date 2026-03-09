@@ -61,12 +61,10 @@ export const assignTask = async (req, res) => {
 
     await task.save();
 
-    // Employee ko assignment email bhejna
-    try {
-      await sendTaskEmail(task, "assigned", user.email);
-    } catch (emailErr) {
-      console.log("Email send failed (task still saved):", emailErr.message);
-    }
+    // Send email in background (non-blocking) - don't wait for it
+    sendTaskEmail(task, "assigned", user.email).catch((err) =>
+      console.log("Email send failed (task still saved):", err.message)
+    );
 
     res.status(201).json({ message: "Task assigned successfully!", task });
   } catch (error) {
