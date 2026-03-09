@@ -3,7 +3,10 @@ import axios from "axios";
 // Automatically detect API URL based on environment
 const getBaseURL = () => {
   // Local development (same domain)
-  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+  if (
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1"
+  ) {
     return "http://localhost:3000/api";
   }
   // Production (different domain - need Authorization header)
@@ -13,8 +16,8 @@ const getBaseURL = () => {
 const BASE_URL = getBaseURL();
 console.log("API URL:", BASE_URL);
 
-// Store token from login response
-let authToken = null;
+// Store token from login response (Persisted to localStorage)
+let authToken = localStorage.getItem("token") || null;
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -35,7 +38,7 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Add response interceptor
@@ -48,14 +51,21 @@ axiosInstance.interceptors.response.use(
     console.log("✗ Error:", error.response?.status, error.config?.url);
     if (error.response?.status === 401) {
       authToken = null;
+      localStorage.removeItem("token");
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export const setToken = (token) => {
   authToken = token;
-  console.log(authToken ? "✓ Token set" : "🔄 Token cleared");
+  if (token) {
+    localStorage.setItem("token", token);
+    console.log("✓ Token set in localStorage");
+  } else {
+    localStorage.removeItem("token");
+    console.log("🔄 Token cleared from localStorage");
+  }
 };
 
 export const getToken = () => authToken;

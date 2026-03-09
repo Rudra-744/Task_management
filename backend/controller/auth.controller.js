@@ -52,8 +52,8 @@ export const signup = async (req, res) => {
     const isProduction = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction ? true : false,
-      sameSite: isProduction ? "none" : "lax",
+      secure: true, // Always true for cross-site (Render/Vercel)
+      sameSite: "none", // Must be none for cross-site
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -103,8 +103,9 @@ export const login = async (req, res) => {
     const isProduction = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction ? true : false, // Secure only in production
-      sameSite: isProduction ? "none" : "lax",
+      secure: true, // Secure only in production
+      sameSite: "none",
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -140,7 +141,9 @@ export const adminLogin = async (req, res) => {
     // Only allow admin and project_manager roles
     const allowedRoles = ["admin", "project_manager"];
     if (!allowedRoles.includes(user.role)) {
-      return res.status(403).json({ message: "Access denied. Admin or Project Manager only." });
+      return res
+        .status(403)
+        .json({ message: "Access denied. Admin or Project Manager only." });
     }
 
     const isPasswordValid = await bcryptjs.compare(password, user.password);
@@ -160,8 +163,10 @@ export const adminLogin = async (req, res) => {
     const isProduction = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction ? true : false,
-      sameSite: isProduction ? "none" : "lax",      path: "/",      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({
@@ -182,7 +187,7 @@ export const adminLogin = async (req, res) => {
 export const getMe = async (req, res) => {
   try {
     let token = req.cookies.token;
-    
+
     // Try Authorization header if no cookie
     if (!token && req.headers.authorization) {
       const auth = req.headers.authorization;
@@ -211,11 +216,12 @@ export const getMe = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     const isProduction = process.env.NODE_ENV === "production";
-    res.clearCookie("token", {
+    res.cookie("token", "", {
       httpOnly: true,
-      secure: isProduction ? true : false,
-      sameSite: isProduction ? "none" : "lax",
+      secure: true,
+      sameSite: "none",
       path: "/",
+      expires: new Date(0), // Instantly expire cookie
     });
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {

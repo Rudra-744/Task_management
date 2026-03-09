@@ -45,7 +45,6 @@ const AuthPage = () => {
       setUser(res.data.user);
       toast.success(res.data.message || "Welcome!");
 
-      // Direct redirection based on role for a smoother experience
       if (
         res.data.user.role === "admin" ||
         res.data.user.role === "project_manager"
