@@ -62,7 +62,9 @@ const AdminDashboard = () => {
           navigate("/auth");
         }, 1000);
       } else {
-        toast.error(err.response?.data?.message || "Failed to load employee list");
+        toast.error(
+          err.response?.data?.message || "Failed to load employee list",
+        );
       }
     }
   };
@@ -93,19 +95,34 @@ const AdminDashboard = () => {
         formData.append("file", form.file);
       }
 
-      await axiosInstance.post("/admin/assign-task", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      const response = await axiosInstance.post(
+        "/admin/assign-task",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         },
-      });
+      );
+
+      // Find the user to immediately populate the new task in the UI local state
+      const assignedUser = users.find((u) => u._id === form.assignedTo);
+      const newTask = {
+        ...response.data.task,
+        assignedTo: assignedUser
+          ? { name: assignedUser.name, email: assignedUser.email }
+          : { name: "—" },
+      };
+
+      // Instantly inject the populated task at the top of the tasks list
+      setTasks((prevTasks) => [newTask, ...prevTasks]);
+
       setMessage("Task assigned! ✅");
       setForm({ title: "", description: "", assignedTo: "", file: null });
 
       // Reset file input value manually
       const fileInput = document.querySelector('input[type="file"]');
       if (fileInput) fileInput.value = "";
-
-      fetchTasks();
     } catch (err) {
       setMessage(err.response?.data?.message || "Error");
     } finally {
