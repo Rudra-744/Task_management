@@ -32,8 +32,13 @@ export const protectRoute = async (req, res, next) => {
 
 export const protectAdminRoute = async (req, res, next) => {
   try {
+    console.log("=== PROTECT ADMIN ROUTE ===");
     console.log("Cookies received:", req.cookies);
-    console.log("Headers:", req.headers);
+    console.log("Cookie names:", Object.keys(req.cookies));
+    console.log("Headers:", {
+      origin: req.headers.origin,
+      referer: req.headers.referer,
+    });
     
     let token = req.cookies.token;
     
@@ -42,10 +47,12 @@ export const protectAdminRoute = async (req, res, next) => {
       const authHeader = req.headers.authorization;
       if (authHeader.startsWith("Bearer ")) {
         token = authHeader.slice(7);
+        console.log("✓ Token from Authorization header");
       }
     }
 
     if (!token) {
+      console.log("❌ No token found!");
       return res.status(401).json({ message: "Unauthorized - Token missing" });
     }
 
@@ -54,10 +61,11 @@ export const protectAdminRoute = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ message: "Unauthorized - User not found" });
     }
+    console.log("✓ User authenticated:", user.email);
     req.user = user;
     next();
   } catch (error) {
-    console.log("Protect admin route error:", error.message);
+    console.log("❌ Protect admin route error:", error.message);
     return res.status(401).json({ message: "Unauthorized" });
   }
 };
