@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axiosInstance, { setAuthToken } from "../api/axios";
+import axiosInstance from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
@@ -35,11 +35,7 @@ const AuthPage = () => {
       }
       
       console.log("✓ Auth successful:", res.data.user.email);
-      
-      // Store token in axios for all future requests
-      if (res.data.token) {
-        setAuthToken(res.data.token);
-      }
+      console.log("✓ Cookie will be set by server");
       
       // Set user in context
       setUser(res.data.user);

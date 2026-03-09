@@ -15,22 +15,13 @@ console.log("API URL:", BASE_URL);
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true, // ← Try to send cookies
+  withCredentials: true, // ← Automatically sends cookies
 });
 
-// Add request interceptor for debugging
+// Add request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    // Get token from sessionStorage
-    const token = sessionStorage.getItem("authToken");
-    
-    // Add token to Authorization header if available
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-      console.log("→ Request with Bearer token:", config.url);
-    } else {
-      console.log("→ Request:", config.method.toUpperCase(), config.url);
-    }
+    console.log("→ Request:", config.method.toUpperCase(), config.url);
     return config;
   },
   (error) => {
@@ -38,7 +29,7 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Add response interceptor for debugging
+// Add response interceptor
 axiosInstance.interceptors.response.use(
   (response) => {
     console.log("✓ Response:", response.status, response.config.url);
@@ -49,16 +40,5 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-// Export function to set/clear token
-export const setAuthToken = (token) => {
-  if (token) {
-    sessionStorage.setItem("authToken", token);
-    console.log("✓ Token stored in sessionStorage");
-  } else {
-    sessionStorage.removeItem("authToken");
-    console.log("🔄 Token cleared from sessionStorage");
-  }
-};
 
 export default axiosInstance;
