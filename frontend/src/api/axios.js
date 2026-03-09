@@ -1,7 +1,17 @@
 import axios from "axios";
 
-// Use environment variable or localhost for development
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+// Automatically detect API URL based on environment
+const getBaseURL = () => {
+  // Local development
+  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    return "http://localhost:3000/api";
+  }
+  // Production
+  return "https://task-management-7czz.onrender.com/api";
+};
+
+const BASE_URL = getBaseURL();
+console.log("API URL:", BASE_URL);
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
