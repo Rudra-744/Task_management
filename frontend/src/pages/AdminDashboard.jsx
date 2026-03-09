@@ -57,8 +57,10 @@ const AdminDashboard = () => {
       // Surface toast if it's a 401 error
       if (err.response?.status === 401) {
         toast.error("Session expired. Please login again.");
-        setUser(null);
-        navigate("/auth");
+        setTimeout(() => {
+          setUser(null);
+          navigate("/auth");
+        }, 1000);
       } else {
         toast.error(err.response?.data?.message || "Failed to load employee list");
       }
@@ -67,10 +69,13 @@ const AdminDashboard = () => {
 
   const handleLogout = async () => {
     try {
+      console.log("🔄 Logging out...");
       await axiosInstance.post("/auth/logout");
+      console.log("✓ Server logout successful");
     } catch (error) {
-      console.error("Logout failed on server", error);
+      console.error("❌ Logout failed on server", error);
     } finally {
+      console.log("✓ Clearing local auth data");
       setUser(null);
       navigate("/auth");
     }

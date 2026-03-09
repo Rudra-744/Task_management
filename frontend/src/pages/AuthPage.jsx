@@ -22,6 +22,9 @@ const AuthPage = () => {
     setLoading(true);
     try {
       let res;
+      const isSignup = !isLogin;
+      console.log(`🔐 ${isSignup ? "Signup" : "Login"} attempt`);
+      
       if (isLogin) {
         res = await axiosInstance.post("/auth/login", {
           email: form.email,
@@ -30,6 +33,10 @@ const AuthPage = () => {
       } else {
         res = await axiosInstance.post("/auth/signup", form);
       }
+      
+      console.log("✓ Auth successful:", res.data.user.email);
+      
+      // Set user in context - cookie automatically set by backend
       setUser(res.data.user);
       toast.success(res.data.message || "Welcome!");
 
@@ -38,11 +45,14 @@ const AuthPage = () => {
         res.data.user.role === "admin" ||
         res.data.user.role === "project_manager"
       ) {
+        console.log("→ Navigating to /admin (admin/PM)");
         navigate("/admin");
       } else {
+        console.log("→ Navigating to /tasks (employee)");
         navigate("/tasks");
       }
     } catch (err) {
+      console.error("❌ Auth failed:", err.response?.data?.message);
       toast.error(err.response?.data?.message || "Something went wrong");
       setError(err.response?.data?.message || "Something went wrong");
     } finally {

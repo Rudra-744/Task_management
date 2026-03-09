@@ -16,10 +16,20 @@ const AdminAuthPage = () => {
     setLoading(true);
     setError("");
     try {
+      console.log("🔐 Admin login attempt");
       const res = await axiosInstance.post("/auth/admin-login", form);
+      console.log("✓ Login successful:", res.data.user.email);
+      
+      // Set user in context - cookie automatically set by backend
       setUser(res.data.user);
-      navigate("/admin");
+      
+      // Navigate to admin
+      setTimeout(() => {
+        console.log("→ Navigating to /admin");
+        navigate("/admin");
+      }, 100);
     } catch (error) {
+      console.error("❌ Login failed:", error.response?.data?.message);
       setError(error.response?.data?.message || "Login Failed");
     } finally {
       setLoading(false);
