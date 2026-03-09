@@ -60,11 +60,13 @@ export const assignTask = async (req, res) => {
     });
 
     await task.save();
+    console.log("✅ Task saved:", task._id);
+    console.log("📧 Starting email send to:", user.email);
 
     // Send email in background (non-blocking) - don't wait for it
-    sendTaskEmail(task, "assigned", user.email).catch((err) =>
-      console.log("Email send failed (task still saved):", err.message)
-    );
+    sendTaskEmail(task, "assigned", user.email)
+      .then(() => console.log("✅ Email promise resolved"))
+      .catch((err) => console.log("❌ Email promise rejected:", err.message));
 
     res.status(201).json({ message: "Task assigned successfully!", task });
   } catch (error) {

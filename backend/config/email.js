@@ -5,6 +5,11 @@ let transporter = null;
 
 const getTransporter = () => {
   if (!transporter) {
+    console.log("📧 Creating email transporter...");
+    console.log("📧 EMAIL_USER:", process.env.EMAIL_USER);
+    console.log("📧 EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
+    console.log("📧 EMAIL_PASS length:", process.env.EMAIL_PASS?.length || 0);
+    
     transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
@@ -18,11 +23,25 @@ const getTransporter = () => {
       maxConnections: 5,
       maxMessages: 100,
     });
+    
+    // Verify connection
+    transporter.verify((error, success) => {
+      if (error) {
+        console.log("❌ Email transporter verification failed:", error.message);
+      } else {
+        console.log("✅ Email transporter ready to send!");
+      }
+    });
   }
   return transporter;
 };
 
 export const sendTaskEmail = async (task, action, userEmail) => {
+  console.log("=== EMAIL SEND ATTEMPT ===");
+  console.log("📧 To:", userEmail);
+  console.log("📧 Action:", action);
+  console.log("📧 Task:", task.title);
+  
   try {
     const transport = getTransporter();
 
@@ -53,10 +72,18 @@ export const sendTaskEmail = async (task, action, userEmail) => {
       html,
     };
 
-    await transport.sendMail(mailOptions);
-    console.log(`✓ Email sent to ${userEmail} for ${action}`);
+    console.log("📧 Sending email...");
+    const result = await transport.sendMail(mailOptions);
+    console.log("✅ EMAIL SENT SUCCESSFULLY!");
+    console.log("📧 Message ID:", result.messageId);
+    console.log("📧 Response:", result.response);
+    return result;
   } catch (error) {
-    console.log(`✗ Email failed to ${userEmail}:`, error.message);
-    throw error; // Re-throw so caller knows it failed
+    console.log("❌ EMAIL SEND FAILED!");
+    console.log("❌ Error name:", error.name);
+    console.log("❌ Error message:", error.message);
+    console.log("❌ Error code:", error.code);
+    console.log("❌ Full error:", error);
+    throw error;
   }
 };
